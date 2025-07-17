@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiny Tashan - Clothing Store</title>
+    <!-- Tailwind CSS -->
+    <link href="https://unpkg.com/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f8f8;
+        }
+        .font-inter {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        #app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #main-content {
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .product-image {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .carousel {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 8px;
+        }
+        .carousel img {
+            flex-shrink: 0;
+        }
+        .carousel::-webkit-scrollbar {
+            height: 6px;
+        }
+        .carousel::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 6px;
+        }
+        #add-update-product-btn {
+            display: block !important;
+            z-index: 10;
+            min-height: 48px;
+            min-width: 150px;
+        }
+        @media print {
+            body {
+                background-color: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            .receipt-58mm {
+                width: 58mm;
+                font-family: 'monospace';
+                font-size: 9px;
+                padding: 5mm;
+                box-sizing: border-box;
+                color: #000;
+            }
+            .receipt-58mm h1 {
+                font-size: 1.2em;
+                text-align: center;
+                margin-bottom: 5px;
+            }
+            .receipt-58mm h2 {
+                font-size: 1em;
+                text-align: center;
+                margin-bottom: 5px;
+            }
+            .receipt-58mm .receipt-header,
+            .receipt-58mm .receipt-footer,
+            .receipt-58mm .receipt-customer {
+                text-align: center;
+                margin-bottom: 5px;
+            }
+            .receipt-58mm .receipt-line {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 2px;
+            }
+            .receipt-58mm .receipt-item-name {
+                flex-grow: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .receipt-58mm .receipt-item-qty {
+                width: 15mm;
+                text-align: center;
+            }
+            .receipt-58mm .receipt-item-price,
+            .receipt-58mm .receipt-total {
+                text-align: right;
+                width: 15mm;
+            }
+            .receipt-58mm .dashed-line {
+                border-top: 1px dashed #000;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation Bar -->
+        <nav class="bg-indigo-800 p-4 shadow-lg">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+                <h1 class="text-white text-2xl font-bold">Tiny Tashan</h1>
+                <div class="flex flex-wrap justify-center space-x-2 sm:space-x-4">
+                    <button id="customer-view-btn" class="px-4 py-2 rounded-md font-medium transition-colors duration-200 text-gray-300 hover:bg-indigo-700 hover:text-white">
+                        Shop
+                    </button>
+                    <button id="cart-view-btn" class="px-4 py-2 rounded-md font-medium transition-colors duration-200 text-gray-300 hover:bg-indigo-700 hover:text-white">
+                        Cart
+                    </button>
+                    <button id="admin-view-btn" class="px-4 py-2 rounded-md font-medium transition-colors duration-200 text-gray-300 hover:bg-indigo-700 hover:text-white">
+                        Admin Panel
+                    </button>
+                    <button id="product-management-view-btn" class="px-4 py-2 rounded-md font-medium transition-colors duration-200 text-gray-300 hover:bg-indigo-700 hover:text-white">
+                        Product Management
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="p-4"></main>
+
+        <!-- Message Box Container -->
+        <div id="message-box-container" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                <p id="message-box-text" class="text-lg font-semibold mb-4 text-gray-800"></p>
+                <div class="flex justify-center space-x-4">
+                    <button id="message-box-confirm" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition duration-200">
+                        OK
+                    </button>
+                    <button id="message-box-cancel" class="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-200 hidden">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Prompt Modal -->
+        <div id="password-prompt-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Enter Password</h2>
+                <input type="password" id="password-input" class="w-full p-3 border border-gray-300 rounded-md mb-4 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Password">
+                <p id="password-error" class="text-red-500 text-sm mb-4 hidden">Incorrect password.</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="password-submit-btn" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">
+                        Submit
+                    </button>
+                    <button id="password-cancel-btn" class="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition duration-200">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Details Modal -->
+        <div id="customer-details-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 p-4 hidden">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full text-center">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Enter Your Details</h2>
+                <form id="customer-details-form" class="space-y-4">
+                    <input type="text" id="customer-name" placeholder="Full Name" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="text" id="customer-address" placeholder="Address" required class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <input type="tel" id="customer-phone" placeholder="Phone Number (e.g., 9876543210)" required pattern="[0-9]{10}" class="w-full p-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                    <p id="customer-details-error" class="text-red-500 text-sm mb-4 hidden">Please fill all fields correctly.</p>
+                    <div class="flex justify-center space-x-4">
+                        <button type="submit" id="customer-details-submit" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition duration-200">
+                            Submit
+                        </button>
+                        <button type="button" id="customer-details-cancel" class="px-6 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition duration-200">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // Global variables
+        let app, db, auth, analytics, storage, userId, isAuthReady = false, currentView = 'customer';
+        let messageBoxConfirmCallback = null, messageBoxCancelCallback = null;
+        let customerDetailsCallback = null;
+        const ADMIN_PASSWORD = "admin123"; // **Note: Never hardcode in production**
+
+        // Firebase Configuration
+        const myFirebaseConfig = {
+            apiKey: "AIzaSyBJY64GKH-pyiA5mv769WwI4U1HURWDQ_4",
+            authDomain: "tiny-tashan.firebaseapp.com",
+            projectId: "tiny-tashan",
+            storageBucket: "tiny-tashan.firebasestorage.app",
+            messagingSenderId: "814652074706",
+            appId: "1:814652074706:web:4dbdfb0ee126359a52db0b",
+            measurementId: "G-42ZH5LZ03F"
+        };
+        const TINY_TASHAN_APP_ID = myFirebaseConfig.projectId;
+
+        function validateFirebaseConfig(config) {
+            const requiredFields = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+            for (const field of requiredFields) {
+                if (!config[field] || config[field].includes('YOUR_')) {
+                    return `Missing or invalid Firebase config field: ${field}`;
+                }
+            }
+            return null;
+        }
+
+        function showMessageBox(message, onConfirm, onCancel = null, showCancel = false) {
+            try {
+                const msgBoxContainer = document.getElementById('message-box-container');
+                const msgBoxText = document.getElementById('message-box-text');
+                const msgBoxConfirmBtn = document.getElementById('message-box-confirm');
+                const msgBoxCancelBtn = document.getElementById('message-box-cancel');
+
+                if (!msgBoxContainer || !msgBoxText || !msgBoxConfirmBtn || !msgBoxCancelBtn) {
+                    throw new Error("Message box elements not found");
+                }
+
+                msgBoxText.textContent = message;
+                messageBoxConfirmCallback = onConfirm;
+                messageBoxCancelCallback = onCancel;
+
+                msgBoxConfirmBtn.onclick = () => {
+                    if (messageBoxConfirmCallback) messageBoxConfirmCallback();
+                    hideMessageBox();
+                };
+
+                if (showCancel) {
+                    msgBoxCancelBtn.classList.remove('hidden');
+                    msgBoxCancelBtn.onclick = () => {
+                        if (messageBoxCancelCallback) messageBoxCancelCallback();
+                        hideMessageBox();
+                    };
+                } else {
+                    msgBoxCancelBtn.classList.add('hidden');
+                }
+
+                msgBoxContainer.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error showing message box:", error.message);
+            }
+        }
+
+        function hideMessageBox() {
+            try {
+                const msgBoxContainer = document.getElementById('message-box-container');
+                if (msgBoxContainer) {
+                    msgBoxContainer.classList.add('hidden');
+                }
+                messageBoxConfirmCallback = null;
+                messageBoxCancelCallback = null;
+            } catch (error) {
+                console.error("Error hiding message box:", error.message);
+            }
+        }
+
+        function showPasswordPrompt(targetView) {
+            try {
+                if (sessionStorage.getItem(`loggedIn_${targetView}`) === 'true') {
+                    currentView = targetView;
+                    renderCurrentView();
+                    return;
+                }
+
+                const passwordModal = document.getElementById('password-prompt-modal');
+                const passwordInput = document.getElementById('password-input');
+                const passwordError = document.getElementById('password-error');
+                const passwordSubmitBtn = document.getElementById('password-submit-btn');
+                const passwordCancelBtn = document.getElementById('password-cancel-btn');
+
+                if (!passwordModal || !passwordInput || !passwordError || !passwordSubmitBtn || !passwordCancelBtn) {
+                    throw new Error("Password prompt elements not found");
+                }
+
+                passwordInput.value = '';
+                passwordError.classList.add('hidden');
+                passwordModal.classList.remove('hidden');
+                passwordInput.focus();
+
+                const handleSubmit = () => {
+                    if (passwordInput.value === ADMIN_PASSWORD) {
+                        sessionStorage.setItem(`loggedIn_${targetView}`, 'true');
+                        passwordModal.classList.add('hidden');
+                        currentView = targetView;
+                        renderCurrentView();
+                    } else {
+                        passwordError.classList.remove('hidden');
+                    }
+                };
+
+                passwordSubmitBtn.onclick = null;
+                passwordInput.onkeydown = null;
+                passwordCancelBtn.onclick = null;
+
+                passwordSubmitBtn.onclick = handleSubmit;
+                passwordInput.onkeydown = (e) => { if (e.key === 'Enter') handleSubmit(); };
+                passwordCancelBtn.onclick = () => passwordModal.classList.add('hidden');
+            } catch (error) {
+                console.error("Error in password prompt:", error.message);
+                showMessageBox("Failed to show password prompt.");
+            }
+        }
+
+        function showCustomerDetailsForm(onSubmit) {
+            try {
+                const modal = document.getElementById('customer-details-modal');
+                const form = document.getElementById('customer-details-form');
+                const nameInput = document.getElementById('customer-name');
+                const addressInput = document.getElementById('customer-address');
+                const phoneInput = document.getElementById('customer-phone');
+                const error = document.getElementById('customer-details-error');
+                const submitBtn = document.getElementById('customer-details-submit');
+                const cancelBtn = document.getElementById('customer-details-cancel');
+
+                if (!modal || !form || !nameInput || !addressInput || !phoneInput || !error || !submitBtn || !cancelBtn) {
+                    throw new Error("Customer details modal elements not found");
+                }
+
+                nameInput.value = '';
+                addressInput.value = '';
+                phoneInput.value = '';
+                error.classList.add('hidden');
+                modal.classList.remove('hidden');
+                nameInput.focus();
+
+                customerDetailsCallback = onSubmit;
+
+                form.onsubmit = (e) => {
+                    e.preventDefault();
+                    const name = nameInput.value.trim();
+                    const address = addressInput.value.trim();
+                    const phone = phoneInput.value.trim();
+
+                    if (!name || !address || !phone.match(/^[0-9]{10}$/)) {
+                        error.textContent = !name ? "Name is required." : !address ? "Address is required." : "Phone number must be 10 digits.";
+                        error.classList.remove('hidden');
+                        return;
+                    }
+
+                    if (customerDetailsCallback) {
+                        customerDetailsCallback({ name, address, phone });
+                        modal.classList.add('hidden');
+                    }
+                };
+
+                cancelBtn.onclick = () => {
+                    modal.classList.add('hidden');
+                    customerDetailsCallback = null;
+                };
+            } catch (error) {
+                console.error("Error showing customer details form:", error.message);
+                showMessageBox("Failed to show customer details form.");
+            }
+        }
+
+        async function initializeFirebase() {
+            try {
+                const configError = validateFirebaseConfig(myFirebaseConfig);
+                if (configError) {
+                    throw new Error(configError);
+                }
+
+                app = initializeApp(myFirebaseConfig);
+                analytics = getAnalytics(app);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                storage = getStorage(app);
+                console.log("Firebase app initialized:", app.name);
+
+                await signInAnonymously(auth);
+                console.log("Anonymous auth successful");
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        console.log("User authenticated with ID:", userId);
+                        addDefaultProducts(db).then(() => {
+                            console.log("Default products check completed");
+                            renderCurrentView();
+                        }).catch(err => {
+                            console.error("Error adding default products:", err.message);
+                            showMessageBox("Failed to initialize products.");
+                        });
+                    } else {
+                        console.error("No user authenticated");
+                        userId = crypto.randomUUID();
+                        isAuthReady = true;
+                        renderCurrentView();
+                    }
+                });
+            } catch (error) {
+                console.error("Firebase initialization error:", error.message);
+                showMessageBox(`Failed to initialize Firebase: ${error.message}. Check your network or Firebase setup.`);
+            }
+        }
+
+        async function uploadImageToFirebase(file) {
+            try {
+                if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                    throw new Error("Only JPEG or PNG images are allowed.");
+                }
+                const storageRef = ref(storage, `product_images/${file.name}_${Date.now()}`);
+                await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(storageRef);
+                return downloadURL;
+            } catch (error) {
+                console.error("Error uploading image to Firebase:", error.message);
+                throw error;
+            }
+        }
+
+        // Customer Panel Logic
+        let customerProducts = [], customerCart = {}, unsubscribeCustomerProducts = null;
+
+        function renderCustomerPanel() {
+            try {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) throw new Error("Main content element not found");
+
+                mainContent.innerHTML = `
+                    <div class="h-full bg-gradient-to-br from-purple-100 to-pink-200 p-4 font-inter text-gray-800 overflow-y-auto">
+                        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                            <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-8 tracking-tight">
+                                Welcome to Tiny Tashan!
+                            </h1>
+                            <div class="mb-8 p-6 bg-indigo-50 rounded-lg shadow-inner">
+                                <h2 class="text-2xl font-bold text-indigo-600 mb-4">Our Trendy Collection</h2>
+                                <div id="products-display">
+                                    <p class="text-gray-600 text-center">Loading products...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                fetchCustomerData();
+            } catch (error) {
+                console.error("Error rendering customer panel:", error.message);
+                showMessageBox("Failed to load shop view.");
+            }
+        }
+
+        function renderProducts() {
+            try {
+                const productsDisplay = document.getElementById('products-display');
+                if (!productsDisplay) throw new Error("Products display element not found");
+
+                productsDisplay.innerHTML = '';
+                if (customerProducts.length === 0) {
+                    productsDisplay.innerHTML = '<p class="col-span-full text-center text-gray-600">No products available.</p>';
+                    return;
+                }
+
+                const sortedProducts = [...customerProducts].sort((a, b) => a.name.localeCompare(b.name));
+                const categorizedProducts = sortedProducts.reduce((acc, item) => {
+                    (acc[item.category] = acc[item.category] || []).push(item);
+                    return acc;
+                }, {});
+
+                for (const category in categorizedProducts) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = "mb-6";
+
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = "flex justify-between items-center text-2xl font-semibold text-indigo-700 mb-4 px-3 py-1 bg-indigo-100 rounded-md cursor-pointer hover:bg-indigo-200 transition-colors duration-200";
+                    categoryHeader.innerHTML = `
+                        <h3>${category}</h3>
+                        <svg class="w-6 h-6 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    `;
+                    categoryDiv.appendChild(categoryHeader);
+
+                    const categoryItemsGrid = document.createElement('div');
+                    categoryItemsGrid.className = `grid grid-cols-1 sm:grid-cols-2 gap-4 hidden`;
+                    categoryItemsGrid.id = `category-${category.replace(/\s/g, '-')}-items`;
+                    categoryDiv.appendChild(categoryItemsGrid);
+
+                    productsDisplay.appendChild(categoryDiv);
+
+                    categorizedProducts[category].forEach(item => {
+                        const imageHtml = item.imageUrls && item.imageUrls.length > 0
+                            ? `<div class="carousel">${item.imageUrls.map(url => `<img src="${url}" alt="${item.name}" class="product-image">`).join('')}</div>`
+                            : '<div class="w-[100px] h-[100px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">No Images</div>';
+
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = "flex items-center justify-between p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200";
+                        itemDiv.innerHTML = `
+                            <div class="flex items-center space-x-4">
+                                ${imageHtml}
+                                <div>
+                                    <h3 class="text-xl font-semibold text-indigo-800">${item.name}</h3>
+                                    <p class="text-gray-600 text-sm">${item.description || ''}</p>
+                                    <p class="text-lg font-bold text-green-700 mt-1">₹${item.price.toFixed(2)}</p>
+                                    <p class="text-sm text-gray-500">Size: ${item.size || 'N/A'}</p>
+                                    <p class="text-sm text-gray-500">Stock: ${item.stock || 0}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                ${customerCart[item.id] > 0 ? `
+                                    <button class="remove-from-cart-btn p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200" data-item-id="${item.id}">
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                                    </button>
+                                    <span class="text-lg font-bold text-indigo-700">${customerCart[item.id]}</span>
+                                ` : ''}
+                                <button class="add-to-cart-btn p-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors duration-200 ${item.stock <= 0 ? 'opacity-50 cursor-not-allowed' : ''}" data-item-id="${item.id}" ${item.stock <= 0 ? 'disabled' : ''}>
+                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                </button>
+                            </div>
+                        `;
+                        categoryItemsGrid.appendChild(itemDiv);
+                    });
+
+                    categoryHeader.onclick = () => {
+                        categoryItemsGrid.classList.toggle('hidden');
+                        categoryHeader.querySelector('svg').classList.toggle('rotate-180');
+                    };
+                }
+
+                document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+                    button.onclick = (e) => {
+                        const itemId = e.currentTarget.dataset.itemId;
+                        const item = customerProducts.find(m => m.id === itemId);
+                        if (item && item.stock > (customerCart[item.id] || 0)) {
+                            customerCart = { ...customerCart, [item.id]: (customerCart[item.id] || 0) + 1 };
+                            renderProducts();
+                        } else {
+                            showMessageBox("This item is out of stock or maximum quantity reached.");
+                        }
+                    };
+                });
+                document.querySelectorAll('.remove-from-cart-btn').forEach(button => {
+                    button.onclick = (e) => {
+                        const itemId = e.currentTarget.dataset.itemId;
+                        const newCart = { ...customerCart };
+                        if (newCart[itemId] > 1) {
+                            newCart[itemId]--;
+                        } else {
+                            delete newCart[itemId];
+                        }
+                        customerCart = newCart;
+                        renderProducts();
+                    };
+                });
+            } catch (error) {
+                console.error("Error rendering products:", error.message);
+                showMessageBox("Failed to display products.");
+            }
+        }
+
+        function fetchCustomerData() {
+            try {
+                if (!db || !isAuthReady) {
+                    console.warn("Database or auth not ready for customer data");
+                    return;
+                }
+                if (unsubscribeCustomerProducts) unsubscribeCustomerProducts();
+                unsubscribeCustomerProducts = onSnapshot(collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`), (snapshot) => {
+                    customerProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    console.log("Fetched customer products:", customerProducts.length);
+                    renderProducts();
+                }, (error) => {
+                    console.error("Error fetching customer products:", error.message);
+                    showMessageBox("Failed to fetch products. Check Firebase rules or network.");
+                });
+            } catch (error) {
+                console.error("Error in fetchCustomerData:", error.message);
+                showMessageBox("Failed to load shop data.");
+            }
+        }
+
+        // Cart Panel Logic
+        function renderCartPanel() {
+            try {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) throw new Error("Main content element not found");
+
+                mainContent.innerHTML = `
+                    <div class="h-full bg-gradient-to-br from-pink-100 to-purple-200 p-4 font-inter text-gray-800 overflow-y-auto">
+                        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                            <h1 class="text-4xl font-extrabold text-center text-indigo-700 mb-8 tracking-tight">
+                                Your Shopping Cart
+                            </h1>
+                            <div class="mb-8 p-6 bg-indigo-50 rounded-lg shadow-inner">
+                                <h2 class="text-2xl font-bold text-indigo-600 mb-4">Cart Summary</h2>
+                                <div id="cart-summary">
+                                    <p class="text-gray-600 text-center">Your cart is empty.</p>
+                                </div>
+                                <div class="text-center mt-6">
+                                    <button id="checkout-btn" class="w-full md:w-auto px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xl font-bold rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        Proceed to Checkout
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                renderCartSummary();
+                const checkoutBtn = document.getElementById('checkout-btn');
+                if (checkoutBtn) {
+                    checkoutBtn.onclick = handleCheckout;
+                } else {
+                    console.error("Checkout button not found");
+                }
+            } catch (error) {
+                console.error("Error rendering cart panel:", error.message);
+                showMessageBox("Failed to load cart view.");
+            }
+        }
+
+        function calculateCartTotal() {
+            return Object.entries(customerCart).reduce((total, [itemId, quantity]) => {
+                const item = customerProducts.find(m => m.id === itemId);
+                return total + (item ? item.price * quantity : 0);
+            }, 0);
+        }
+
+        function renderCartSummary() {
+            try {
+                const cartSummaryDiv = document.getElementById('cart-summary');
+                if (!cartSummaryDiv) throw new Error("Cart summary element not found");
+
+                const total = calculateCartTotal();
+
+                if (Object.keys(customerCart).length === 0) {
+                    cartSummaryDiv.innerHTML = '<p class="text-gray-600 text-center">Your cart is empty.</p>';
+                    document.getElementById('checkout-btn').disabled = true;
+                } else {
+                    let itemsHtml = Object.entries(customerCart).map(([itemId, quantity]) => {
+                        const item = customerProducts.find(m => m.id === itemId);
+                        if (!item) return '';
+                        return `
+                            <li class="flex justify-between items-center text-lg">
+                                <span class="font-medium">${item.name} (${item.size || 'N/A'}) x ${quantity}</span>
+                                <span class="font-semibold">₹${(item.price * quantity).toFixed(2)}</span>
+                            </li>
+                        `;
+                    }).join('');
+
+                    cartSummaryDiv.innerHTML = `
+                        <ul class="space-y-2 mb-4">
+                            ${itemsHtml}
+                        </ul>
+                        <div class="flex justify-between items-center border-t-2 border-indigo-200 pt-4 mt-4">
+                            <span class="text-xl font-bold text-indigo-800">Total:</span>
+                            <span class="text-2xl font-extrabold text-green-700">₹${total.toFixed(2)}</span>
+                        </div>
+                    `;
+                    document.getElementById('checkout-btn').disabled = false;
+                }
+            } catch (error) {
+                console.error("Error rendering cart summary:", error.message);
+                showMessageBox("Failed to display cart summary.");
+            }
+        }
+
+        async function handleCheckout() {
+            try {
+                if (Object.keys(customerCart).length === 0) {
+                    showMessageBox("Your cart is empty. Please add items to checkout.");
+                    return;
+                }
+
+                showCustomerDetailsForm(async (customerDetails) => {
+                    showMessageBox("Are you sure you want to place this order?", async () => {
+                        try {
+                            const orderItems = Object.entries(customerCart).map(([itemId, quantity]) => {
+                                const item = customerProducts.find(m => m.id === itemId);
+                                return {
+                                    itemId: itemId,
+                                    name: item ? item.name : 'Unknown Item',
+                                    size: item ? item.size : 'N/A',
+                                    price: item ? item.price : 0,
+                                    quantity: quantity,
+                                    imageUrls: item ? item.imageUrls || [] : []
+                                };
+                            });
+
+                            const ordersCollectionRef = collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`);
+                            await addDoc(ordersCollectionRef, {
+                                items: orderItems,
+                                total: calculateCartTotal(),
+                                status: 'pending',
+                                timestamp: serverTimestamp(),
+                                customerUserId: userId,
+                                customerDetails: {
+                                    name: customerDetails.name,
+                                    address: customerDetails.address,
+                                    phone: customerDetails.phone
+                                }
+                            });
+
+                            const updatePromises = Object.entries(customerCart).map(([itemId, quantity]) => {
+                                const productRef = doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`, itemId);
+                                const product = customerProducts.find(p => p.id === itemId);
+                                if (product) {
+                                    return updateDoc(productRef, { stock: Math.max(0, product.stock - quantity) });
+                                }
+                                return Promise.resolve();
+                            });
+                            await Promise.all(updatePromises);
+
+                            customerCart = {};
+                            renderCartSummary();
+                            showMessageBox("Order placed successfully!");
+                        } catch (error) {
+                            console.error("Error placing order:", error.message);
+                            showMessageBox("Failed to place order: " + error.message);
+                        }
+                    }, () => {}, true);
+                });
+            } catch (error) {
+                console.error("Error in checkout:", error.message);
+                showMessageBox("Checkout failed: " + error.message);
+            }
+        }
+
+        // Admin Panel Logic
+        let adminOrders = [], adminTodaySales = 0, unsubscribeAdminOrders = null, unsubscribeDailySales = null;
+
+        function renderAdminPanel() {
+            try {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) throw new Error("Main content element not found");
+                if (!db || !isAuthReady) throw new Error("Firebase database or authentication not ready");
+
+                mainContent.innerHTML = `
+                    <div class="h-full bg-gradient-to-br from-indigo-100 to-purple-200 p-4 font-inter text-gray-800 overflow-y-auto">
+                        <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                            <h1 class="text-4xl font-extrabold text-center text-indigo-800 mb-8 tracking-tight">
+                                Tiny Tashan - Admin Panel
+                            </h1>
+                            <p class="text-center text-sm text-gray-500 mb-6">
+                                User ID: <span class="font-mono text-xs bg-gray-100 px-2 py-1 rounded">${userId || 'Loading...'}</span>
+                            </p>
+                            <div class="p-6 bg-indigo-50 rounded-lg shadow-inner mb-10">
+                                <h2 class="text-2xl font-bold text-indigo-700 mb-4 border-b-2 border-indigo-200 pb-2">Order & Sales Management</h2>
+                                <div class="mb-6 p-4 bg-indigo-100 rounded-md shadow-sm">
+                                    <h3 class="text-xl font-bold text-indigo-800 mb-2">Today's Sales (<span id="today-date-display">${getTodayDateString()}</span>)</h3>
+                                    <p class="text-3xl font-extrabold text-green-700 text-center">₹<span id="total-today-sales">${adminTodaySales.toFixed(2)}</span></p>
+                                    <button id="clear-today-sales-btn" class="w-full mt-4 px-6 py-3 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition-colors duration-200">
+                                        Clear Today's Sales
+                                    </button>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="order-select" class="block text-lg font-semibold text-indigo-800 mb-2">Select Order for Details:</label>
+                                    <select id="order-select" class="block w-full p-3 border border-indigo-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">-- Choose an Order --</option>
+                                    </select>
+                                </div>
+                                <div id="admin-order-details" class="mt-4 p-4 bg-indigo-100 rounded-md hidden"></div>
+                                <div class="flex flex-col sm:flex-row gap-4 mt-6">
+                                    <button id="print-order-btn" class="flex-1 bg-indigo-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-indigo-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        Print Order Receipt (58mm)
+                                    </button>
+                                    <button id="clear-order-btn" class="flex-1 bg-red-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-red-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                                        Clear Selected Order
+                                    </button>
+                                </div>
+                                <div class="mt-8 pt-4 border-t-2 border-gray-200">
+                                    <h3 class="text-xl font-bold text-gray-700 mb-4">Global Order Cleanup</h3>
+                                    <button id="clear-all-orders-btn" class="w-full bg-red-800 text-white px-6 py-3 rounded-md shadow-md hover:bg-red-900 transition-colors duration-200">
+                                        Clear ALL Orders
+                                    </button>
+                                    <p class="text-sm text-gray-500 mt-2 text-center">
+                                        <strong class="text-red-600">Warning:</strong> This will delete all orders.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                attachAdminPanelListeners();
+                fetchAdminData();
+            } catch (error) {
+                console.error("Error rendering admin panel:", error.message);
+                showMessageBox("Failed to load admin panel: " + error.message);
+            }
+        }
+
+        function attachAdminPanelListeners() {
+            try {
+                const orderSelect = document.getElementById('order-select');
+                const printBtn = document.getElementById('print-order-btn');
+                const clearBtn = document.getElementById('clear-order-btn');
+                const clearTodaySalesBtn = document.getElementById('clear-today-sales-btn');
+                const clearAllOrdersBtn = document.getElementById('clear-all-orders-btn');
+
+                if (!orderSelect || !printBtn || !clearBtn || !clearTodaySalesBtn || !clearAllOrdersBtn) {
+                    throw new Error("Admin panel elements not found");
+                }
+
+                orderSelect.onchange = (e) => {
+                    const selectedOrderId = e.target.value;
+                    if (selectedOrderId) {
+                        printBtn.disabled = false;
+                        clearBtn.disabled = false;
+                        displayOrderDetails(selectedOrderId);
+                    } else {
+                        printBtn.disabled = true;
+                        clearBtn.disabled = true;
+                        document.getElementById('admin-order-details').classList.add('hidden');
+                    }
+                };
+
+                printBtn.onclick = async () => {
+                    const selectedOrderId = orderSelect.value;
+                    if (!selectedOrderId) {
+                        showMessageBox("Please select an order to print.");
+                        return;
+                    }
+                    await printOrder58mm(selectedOrderId);
+                };
+
+                clearBtn.onclick = () => {
+                    const selectedOrderId = orderSelect.value;
+                    if (!selectedOrderId) {
+                        showMessageBox("Please select an order to clear.");
+                        return;
+                    }
+                    showMessageBox("Are you sure you want to clear this order?", async () => {
+                        await clearOrder(selectedOrderId);
+                    }, () => {}, true);
+                };
+
+                clearTodaySalesBtn.onclick = () => {
+                    showMessageBox(`Are you sure you want to clear today's sales (₹${adminTodaySales.toFixed(2)})?`, async () => {
+                        await clearTodaySales();
+                    }, () => {}, true);
+                };
+
+                clearAllOrdersBtn.onclick = () => {
+                    showMessageBox("Are you sure you want to delete ALL orders?", async () => {
+                        await clearAllOrders();
+                    }, () => {}, true);
+                };
+            } catch (error) {
+                console.error("Error attaching admin panel listeners:", error.message);
+                showMessageBox("Failed to initialize admin panel: " + error.message);
+            }
+        }
+
+        function displayOrderDetails(orderId) {
+            try {
+                const orderDetailsDiv = document.getElementById('admin-order-details');
+                if (!orderDetailsDiv) throw new Error("Order details element not found");
+
+                const order = adminOrders.find(o => o.id === orderId);
+                if (!order) {
+                    orderDetailsDiv.innerHTML = '<p class="text-center text-gray-700">Order not found.</p>';
+                    orderDetailsDiv.classList.remove('hidden');
+                    return;
+                }
+
+                const orderDate = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : 'N/A';
+                let itemsHtml = order.items.map(item => `
+                    <li class="flex justify-between text-gray-800">
+                        <span>${item.name} (${item.size}) x${item.quantity}</span>
+                        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                    </li>
+                `).join('');
+
+                const customerDetailsHtml = order.customerDetails ? `
+                    <p class="text-sm text-gray-500 mb-1">Customer: ${order.customerDetails.name}</p>
+                    <p class="text-sm text-gray-500 mb-1">Address: ${order.customerDetails.address}</p>
+                    <p class="text-sm text-gray-500 mb-3">Phone: ${order.customerDetails.phone}</p>
+                ` : '<p class="text-sm text-gray-500 mb-3">No customer details available.</p>';
+
+                orderDetailsDiv.innerHTML = `
+                    <h3 class="text-xl font-bold text-indigo-700 mb-3">Order Details</h3>
+                    <p class="text-sm text-gray-500 mb-3">Order ID: ${order.id}</p>
+                    <p class="text-sm text-gray-500 mb-3">Time: ${orderDate}</p>
+                    ${customerDetailsHtml}
+                    <ul class="space-y-2 mb-4">${itemsHtml}</ul>
+                    <div class="flex justify-between items-center text-xl font-extrabold text-indigo-800 pt-4 border-t-2 border-indigo-400">
+                        <span>Total:</span>
+                        <span>₹${order.total.toFixed(2)}</span>
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-lg font-semibold text-indigo-800 mb-2">Update Status:</label>
+                        <select id="order-status-select" class="w-full p-3 border border-indigo-300 rounded-md">
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                        </select>
+                        <button id="update-order-status-btn" class="mt-2 w-full px-6 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                            Update Status
+                        </button>
+                    </div>
+                `;
+                orderDetailsDiv.classList.remove('hidden');
+
+                const updateStatusBtn = document.getElementById('update-order-status-btn');
+                if (updateStatusBtn) {
+                    updateStatusBtn.onclick = async () => {
+                        const newStatus = document.getElementById('order-status-select').value;
+                        await updateOrderStatus(orderId, newStatus);
+                    };
+                } else {
+                    console.error("Update status button not found");
+                }
+            } catch (error) {
+                console.error("Error displaying order details:", error.message);
+                showMessageBox("Failed to display order details: " + error.message);
+            }
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                await updateDoc(doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`, orderId), { status: newStatus });
+                showMessageBox(`Order status updated to ${newStatus}.`);
+            } catch (error) {
+                console.error("Error updating order status:", error.message);
+                showMessageBox("Failed to update order status: " + error.message);
+            }
+        }
+
+        async function clearOrder(orderId) {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const orderDocRef = doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`, orderId);
+                const orderSnap = await getDoc(orderDocRef);
+                if (orderSnap.exists()) {
+                    const orderData = orderSnap.data();
+                    await updateDailySales(orderData.total || 0);
+                    await deleteDoc(orderDocRef);
+                    showMessageBox("Order cleared and sales updated.");
+                    const orderSelect = document.getElementById('order-select');
+                    const orderDetailsDiv = document.getElementById('admin-order-details');
+                    if (orderSelect) orderSelect.value = '';
+                    if (orderDetailsDiv) orderDetailsDiv.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error("Error clearing order:", error.message);
+                showMessageBox("Failed to clear order: " + error.message);
+            }
+        }
+
+        async function clearTodaySales() {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const todayDate = getTodayDateString();
+                const dailySalesDocRef = doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/dailySales`, todayDate);
+                await setDoc(dailySalesDocRef, {
+                    date: todayDate,
+                    totalSales: 0,
+                    orderCount: 0,
+                    lastUpdated: serverTimestamp()
+                });
+                showMessageBox("Today's sales cleared.");
+            } catch (error) {
+                console.error("Error clearing sales:", error.message);
+                showMessageBox("Failed to clear sales: " + error.message);
+            }
+        }
+
+        async function clearAllOrders() {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const ordersRef = collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`);
+                const snapshot = await getDocs(ordersRef);
+                const deletePromises = snapshot.docs.map(d => deleteDoc(doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`, d.id)));
+                await Promise.all(deletePromises);
+                showMessageBox("All orders cleared.");
+            } catch (error) {
+                console.error("Error clearing all orders:", error.message);
+                showMessageBox("Failed to clear all orders: " + error.message);
+            }
+        }
+
+        async function printOrder58mm(orderId) {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const orderDocRef = doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`, orderId);
+                const orderSnap = await getDoc(orderDocRef);
+                if (!orderSnap.exists()) {
+                    showMessageBox("Order not found.");
+                    return;
+                }
+                const order = orderSnap.data();
+                const orderDate = order.timestamp ? new Date(order.timestamp.toDate()).toLocaleString() : 'N/A';
+
+                let receiptItemsHtml = order.items.map(item => `
+                    <div class="receipt-line">
+                        <span class="receipt-item-name">${item.name} (${item.size})</span>
+                        <span class="receipt-item-qty">${item.quantity}</span>
+                        <span class="receipt-item-price">₹${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                `).join('');
+
+                const customerDetailsHtml = order.customerDetails ? `
+                    <div class="receipt-customer">
+                        <p>Customer: ${order.customerDetails.name}</p>
+                        <p>Address: ${order.customerDetails.address}</p>
+                        <p>Phone: ${order.customerDetails.phone}</p>
+                    </div>
+                ` : '';
+
+                const receiptHtml = `
+                    <div class="receipt-58mm">
+                        <h1>Tiny Tashan</h1>
+                        <h2>--- ORDER RECEIPT ---</h2>
+                        <div class="dashed-line"></div>
+                        <div class="receipt-header">
+                            <p>Date: ${orderDate}</p>
+                            <p>Order ID: ${orderId.substring(0, 8)}...</p>
+                        </div>
+                        ${customerDetailsHtml}
+                        <div class="dashed-line"></div>
+                        <div class="receipt-line" style="font-weight: bold;">
+                            <span class="receipt-item-name">ITEM</span>
+                            <span class="receipt-item-qty">QTY</span>
+                            <span class="receipt-item-price">AMOUNT</span>
+                        </div>
+                        <div class="dashed-line"></div>
+                        ${receiptItemsHtml}
+                        <div class="dashed-line"></div>
+                        <div class="receipt-line" style="font-weight: bold; font-size: 1.1em;">
+                            <span>TOTAL:</span>
+                            <span class="receipt-total">₹${order.total.toFixed(2)}</span>
+                        </div>
+                        <div class="dashed-line"></div>
+                        <div class="receipt-footer">
+                            <p>Thank You for Shopping with Tiny Tashan!</p>
+                            <p>Customer ID: ${userId.substring(0, 8)}...</p>
+                        </div>
+                    </div>
+                `;
+
+                const printWindow = window.open('', '_blank');
+                if (printWindow) {
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Tiny Tashan Order Receipt</title>
+                            <style>
+                                body { margin: 0; padding: 0; }
+                                .receipt-58mm { width: 58mm; font-family: 'monospace'; font-size: 9px; padding: 5mm; box-sizing: border-box; color: #000; }
+                                .receipt-58mm h1 { font-size: 1.2em; text-align: center; margin-bottom: 5px; }
+                                .receipt-58mm h2 { font-size: 1em; text-align: center; margin-bottom: 5px; }
+                                .receipt-58mm .receipt-header, .receipt-58mm .receipt-footer, .receipt-58mm .receipt-customer { text-align: center; margin-bottom: 5px; }
+                                .receipt-58mm .receipt-line { display: flex; justify-content: space-between; margin-bottom: 2px; }
+                                .receipt-58mm .receipt-item-name { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                                .receipt-58mm .receipt-item-qty { width: 15mm; text-align: center; }
+                                .receipt-58mm .receipt-item-price, .receipt-58mm .receipt-total { text-align: right; width: 15mm; }
+                                .receipt-58mm .dashed-line { border-top: 1px dashed #000; margin: 5px 0; }
+                            </style>
+                        </head>
+                        <body>${receiptHtml}</body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    printWindow.print();
+                } else {
+                    showMessageBox("Could not open print window. Allow pop-ups.");
+                }
+            } catch (error) {
+                console.error("Error printing receipt:", error.message);
+                showMessageBox("Failed to print receipt: " + error.message);
+            }
+        }
+
+        async function updateDailySales(amount) {
+            try {
+                if (!db) throw new Error("Firestore not initialized");
+                const todayDate = getTodayDateString();
+                const dailySalesDocRef = doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/dailySales`, todayDate);
+                const docSnap = await getDoc(dailySalesDocRef);
+                if (docSnap.exists()) {
+                    const currentSales = docSnap.data().totalSales || 0;
+                    const currentOrderCount = docSnap.data().orderCount || 0;
+                    await updateDoc(dailySalesDocRef, {
+                        totalSales: currentSales + amount,
+                        orderCount: currentOrderCount + 1,
+                        lastUpdated: serverTimestamp()
+                    });
+                } else {
+                    await setDoc(dailySalesDocRef, {
+                        date: todayDate,
+                        totalSales: amount,
+                        orderCount: 1,
+                        lastUpdated: serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                console.error("Error updating daily sales:", error.message);
+                showMessageBox("Failed to update daily sales: " + error.message);
+            }
+        }
+
+        async function fetchAdminData() {
+            try {
+                if (!db || !isAuthReady) {
+                    console.warn("Database or auth not ready for admin data");
+                    return;
+                }
+
+                if (unsubscribeAdminOrders) unsubscribeAdminOrders();
+                unsubscribeAdminOrders = onSnapshot(collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/orders`), (snapshot) => {
+                    adminOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const orderSelect = document.getElementById('order-select');
+                    if (orderSelect) {
+                        orderSelect.innerHTML = '<option value="">-- Choose an Order --</option>';
+                        adminOrders.forEach(order => {
+                            const option = document.createElement('option');
+                            option.value = order.id;
+                            option.textContent = `Order ${order.id.substring(0, 8)}... (${order.status})`;
+                            orderSelect.appendChild(option);
+                        });
+                    } else {
+                        console.error("Order select element not found");
+                    }
+                }, (error) => {
+                    console.error("Error fetching admin orders:", error.message);
+                    showMessageBox("Failed to fetch orders: " + error.message);
+                });
+
+                if (unsubscribeDailySales) unsubscribeDailySales();
+                const todayDate = getTodayDateString();
+                unsubscribeDailySales = onSnapshot(doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/dailySales`, todayDate), (doc) => {
+                    if (doc.exists()) {
+                        adminTodaySales = doc.data().totalSales || 0;
+                    } else {
+                        adminTodaySales = 0;
+                    }
+                    const totalSalesElement = document.getElementById('total-today-sales');
+                    const dateDisplayElement = document.getElementById('today-date-display');
+                    if (totalSalesElement) {
+                        totalSalesElement.textContent = adminTodaySales.toFixed(2);
+                    } else {
+                        console.error("Total sales element not found");
+                    }
+                    if (dateDisplayElement) {
+                        dateDisplayElement.textContent = todayDate;
+                    } else {
+                        console.error("Today date display element not found");
+                    }
+                }, (error) => {
+                    console.error("Error fetching daily sales:", error.message);
+                    showMessageBox("Failed to fetch sales data: " + error.message);
+                });
+            } catch (error) {
+                console.error("Error in fetchAdminData:", error.message);
+                showMessageBox("Failed to load admin data: " + error.message);
+            }
+        }
+
+        // Product Management Panel Logic
+        let products = [], unsubscribeProductManagement = null;
+
+        function renderProductManagementPanel() {
+            try {
+                const mainContent = document.getElementById('main-content');
+                if (!mainContent) throw new Error("Main content element not found");
+
+                mainContent.innerHTML = `
+                    <div class="h-full bg-gradient-to-br from-green-100 to-teal-200 p-4 font-inter text-gray-800 overflow-y-auto">
+                        <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-2xl p-6 md:p-8">
+                            <h1 class="text-4xl font-extrabold text-center text-teal-800 mb-8 tracking-tight">
+                                Tiny Tashan - Product Management
+                            </h1>
+                            <div class="mb-10 p-6 bg-teal-50 rounded-lg shadow-inner">
+                                <h2 class="text-2xl font-bold text-teal-700 mb-4 border-b-2 border-teal-200 pb-2">Add/Edit Product</h2>
+                                <form id="product-form" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                    <input type="hidden" id="product-id">
+                                    <input type="text" id="product-name" placeholder="Product Name" required class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <input type="text" id="product-category" placeholder="Category (e.g., T-Shirts, Jeans)" required class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <input type="number" id="product-price" placeholder="Price (e.g., 999.99)" step="0.01" required class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <input type="text" id="product-size" placeholder="Size (e.g., S, M, L)" required class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <input type="number" id="product-stock" placeholder="Stock Quantity" required class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500">
+                                    <input type="text" id="product-description" placeholder="Description (Optional)" class="p-3 border border-teal-300 rounded-md focus:ring-teal-500 focus:border-teal-500 col-span-full">
+                                    <div class="col-span-full">
+                                        <label class="block text-lg font-semibold text-teal-700 mb-2">Product Images (Max 5, JPEG/PNG)</label>
+                                        <input type="file" id="product-images" accept="image/jpeg,image/png" multiple class="p-3 border border-teal-300 rounded-md w-full">
+                                        <p class="text-sm text-gray-500 mt-1">Selected: <span id="selected-images-count">0</span>/5 images</p>
+                                    </div>
+                                    <button type="submit" id="add-update-product-btn" class="col-span-full bg-teal-600 text-white px-6 py-3 rounded-md shadow-md hover:bg-teal-700 transition-colors duration-200 text-lg font-semibold mt-4 !block z-10 min-h-[48px] min-w-[150px]">
+                                        Add/Update Product
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="p-6 bg-teal-50 rounded-lg shadow-inner">
+                                <h2 class="text-2xl font-bold text-teal-700 mb-4 border-b-2 border-teal-200 pb-2">Current Products</h2>
+                                <div id="products-list" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                console.log("Product management panel rendered, checking button visibility...");
+                const addUpdateBtn = document.getElementById('add-update-product-btn');
+                if (addUpdateBtn) {
+                    console.log("Add/Update Product button found in DOM");
+                } else {
+                    console.error("Add/Update Product button NOT found in DOM");
+                }
+                attachProductManagementListeners();
+                fetchProductManagementData();
+            } catch (error) {
+                console.error("Error rendering product management panel:", error.message);
+                showMessageBox("Failed to load product management panel: " + error.message);
+            }
+        }
+
+        function attachProductManagementListeners() {
+            try {
+                const productForm = document.getElementById('product-form');
+                const addUpdateBtn = document.getElementById('add-update-product-btn');
+                const imagesInput = document.getElementById('product-images');
+                const imagesCount = document.getElementById('selected-images-count');
+
+                if (!productForm || !addUpdateBtn || !imagesInput || !imagesCount) {
+                    throw new Error("Product form elements not found");
+                }
+
+                imagesInput.onchange = () => {
+                    const files = imagesInput.files;
+                    imagesCount.textContent = Math.min(files.length, 5);
+                };
+
+                productForm.onsubmit = async (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('product-id').value;
+                    const name = document.getElementById('product-name').value;
+                    const category = document.getElementById('product-category').value;
+                    const price = parseFloat(document.getElementById('product-price').value);
+                    const size = document.getElementById('product-size').value;
+                    const stock = parseInt(document.getElementById('product-stock').value);
+                    const description = document.getElementById('product-description').value;
+                    const files = Array.from(imagesInput.files).slice(0, 5);
+
+                    if (isNaN(price) || isNaN(stock)) {
+                        showMessageBox("Please enter valid price and stock values.");
+                        return;
+                    }
+
+                    if (files.length > 5) {
+                        showMessageBox("Maximum 5 images allowed.");
+                        return;
+                    }
+
+                    for (const file of files) {
+                        if (!['image/jpeg', 'image/png'].includes(file.type)) {
+                            showMessageBox("Only JPEG or PNG images are allowed.");
+                            return;
+                        }
+                    }
+
+                    try {
+                        let imageUrls = [];
+                        if (files.length > 0) {
+                            const uploadPromises = files.map(file => uploadImageToFirebase(file));
+                            imageUrls = await Promise.all(uploadPromises);
+                        }
+
+                        if (!db) throw new Error("Firestore not initialized");
+                        const productData = { name, category, price, size, stock, description, imageUrls };
+
+                        if (id) {
+                            await updateDoc(doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`, id), productData);
+                            showMessageBox("Product updated successfully!");
+                        } else {
+                            await addDoc(collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`), productData);
+                            showMessageBox("Product added successfully!");
+                        }
+                        productForm.reset();
+                        document.getElementById('product-id').value = '';
+                        imagesCount.textContent = '0';
+                        addUpdateBtn.textContent = 'Add/Update Product';
+                    } catch (error) {
+                        console.error("Error saving product:", error.message);
+                        showMessageBox("Failed to save product: " + error.message);
+                    }
+                };
+            } catch (error) {
+                console.error("Error attaching product management listeners:", error.message);
+                showMessageBox("Failed to initialize product management: " + error.message);
+            }
+        }
+
+        function renderProductsList() {
+            try {
+                const productsList = document.getElementById('products-list');
+                if (!productsList) throw new Error("Products list element not found");
+
+                productsList.innerHTML = '';
+                if (products.length === 0) {
+                    productsList.innerHTML = '<p class="text-gray-600 text-center">No products added yet.</p>';
+                    return;
+                }
+                const sortedProducts = [...products].sort((a, b) => a.name.localeCompare(b.name));
+                sortedProducts.forEach(item => {
+                    const imagesHtml = item.imageUrls && item.imageUrls.length > 0
+                        ? `<div class="space-y-2">${item.imageUrls.map(url => `<img src="${url}" alt="${item.name}" class="product-image">`).join('')}</div>`
+                        : '<div class="w-[100px] h-[100px] bg-gray-200 rounded-lg flex items-center justify-center text-gray-500">No Images</div>';
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = "flex justify-between items-center bg-white p-3 rounded-md shadow-sm border border-teal-100";
+                    itemDiv.innerHTML = `
+                        <div class="flex items-center space-x-4">
+                            ${imagesHtml}
+                            <div>
+                                <p class="font-medium text-lg text-gray-900">${item.name} (${item.category}, ${item.size})</p>
+                                <p class="text-teal-600 text-base">₹${item.price.toFixed(2)} | Stock: ${item.stock}</p>
+                                ${item.description ? `<p class="text-gray-500 text-sm">${item.description}</p>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="edit-product-btn text-blue-500 hover:text-blue-700 font-medium" data-id="${item.id}">Edit</button>
+                            <button class="delete-product-btn text-red-500 hover:text-red-700 font-medium" data-id="${item.id}">Delete</button>
+                        </div>
+                    `;
+                    productsList.appendChild(itemDiv);
+                });
+
+                document.querySelectorAll('.edit-product-btn').forEach(button => {
+                    button.onclick = (e) => {
+                        const itemId = e.target.dataset.id;
+                        const item = products.find(p => p.id === itemId);
+                        if (item) {
+                            document.getElementById('product-id').value = item.id;
+                            document.getElementById('product-name').value = item.name;
+                            document.getElementById('product-category').value = item.category;
+                            document.getElementById('product-price').value = item.price;
+                            document.getElementById('product-size').value = item.size;
+                            document.getElementById('product-stock').value = item.stock;
+                            document.getElementById('product-description').value = item.description || '';
+                            document.getElementById('add-update-product-btn').textContent = 'Add/Update Product';
+                            document.getElementById('selected-images-count').textContent = item.imageUrls ? item.imageUrls.length : '0';
+                        }
+                    };
+                });
+                document.querySelectorAll('.delete-product-btn').forEach(button => {
+                    button.onclick = (e) => {
+                        const itemId = e.target.dataset.id;
+                        showMessageBox("Are you sure you want to delete this product?", async () => {
+                            try {
+                                await deleteDoc(doc(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`, itemId));
+                                showMessageBox("Product deleted successfully!");
+                            } catch (error) {
+                                console.error("Error deleting product:", error.message);
+                                showMessageBox("Failed to delete product: " + error.message);
+                            }
+                        }, () => {}, true);
+                    };
+                });
+            } catch (error) {
+                console.error("Error rendering products list:", error.message);
+                showMessageBox("Failed to display product list: " + error.message);
+            }
+        }
+
+        function fetchProductManagementData() {
+            try {
+                if (!db || !isAuthReady) {
+                    console.warn("Database or auth not ready for product management");
+                    return;
+                }
+                if (unsubscribeProductManagement) unsubscribeProductManagement();
+                unsubscribeProductManagement = onSnapshot(collection(db, `artifacts/${myFirebaseConfig.projectId}/public/data/products`), (snapshot) => {
+                    products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    console.log("Fetched products for management:", products.length);
+                    renderProductsList();
+                }, (error) => {
+                    console.error("Error fetching products for management:", error.message);
+                    showMessageBox("Failed to fetch products: " + error.message);
+                });
+            } catch (error) {
+                console.error("Error in fetchProductManagementData:", error.message);
+                showMessageBox("Failed to load product management data: " + error.message);
+            }
+        }
+
+        async function addDefaultProducts(firestoreDb) {
+            try {
+                const productsRef = collection(firestoreDb, `artifacts/${myFirebaseConfig.projectId}/public/data/products`);
+                const existingDocs = await getDocs(productsRef);
+                if (existingDocs.empty) {
+                    const defaultProducts = [
+                        { name: "Graphic Tee", category: "T-Shirts", price: 599.99, size: "M", stock: 50, description: "Trendy graphic t-shirt with vibrant print", imageUrls: [] },
+                        { name: "Denim Jeans", category: "Jeans", price: 1299.99, size: "32", stock: 30, description: "Slim-fit blue denim jeans", imageUrls: [] },
+                        { name: "Hoodie", category: "Hoodies", price: 999.99, size: "L", stock: 20, description: "Cozy cotton hoodie", imageUrls: [] },
+                        { name: "Sneakers", category: "Footwear", price: 1999.99, size: "9", stock: 15, description: "Stylish white sneakers", imageUrls: [] },
+                    ];
+                    for (const product of defaultProducts) {
+                        await addDoc(productsRef, product);
+                    }
+                    console.log("Default products added");
+                }
+            } catch (error) {
+                console.error("Error adding default products:", error.message);
+                throw error;
+            }
+        }
+
+        function getTodayDateString() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        function renderCurrentView() {
+            try {
+                if (!isAuthReady) {
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.innerHTML = `
+                            <div class="flex items-center justify-center h-full bg-gray-100">
+                                <div class="text-xl font-semibold text-gray-700">Loading application...</div>
+                            </div>
+                        `;
+                    }
+                    return;
+                }
+
+                if (unsubscribeCustomerProducts) unsubscribeCustomerProducts();
+                if (unsubscribeAdminOrders) unsubscribeAdminOrders();
+                if (unsubscribeDailySales) unsubscribeDailySales();
+                if (unsubscribeProductManagement) unsubscribeProductManagement();
+
+                switch (currentView) {
+                    case 'customer':
+                        renderCustomerPanel();
+                        break;
+                    case 'cart':
+                        renderCartPanel();
+                        break;
+                    case 'admin':
+                        renderAdminPanel();
+                        break;
+                    case 'product-management':
+                        renderProductManagementPanel();
+                        break;
+                    default:
+                        renderCustomerPanel();
+                }
+            } try {
+                console.error("Error rendering current view:", error.message);
+                showMessageBox("Failed to load the application: " + error.message);
+            }
+        }
+
+        document.getElementById('
